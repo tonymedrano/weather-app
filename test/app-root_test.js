@@ -13,7 +13,7 @@
  */
 
 import { AppRoot } from "../app-root.js";
-import { fixture, assert, suite, test } from "@open-wc/testing";
+import { fixture, assert } from "@open-wc/testing";
 import { html } from "lit/static-html.js";
 
 suite("app-root", () => {
