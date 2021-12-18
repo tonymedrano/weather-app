@@ -13,7 +13,7 @@
  */
 
 
- import { LitElement, html, css } from "lit";
+ import { LitElement, html, css } from "lit-element";
  import './app-weather/app-weather.js';
 
  /**

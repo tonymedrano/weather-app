@@ -12,7 +12,7 @@
  * Where Megatron is a real super hero!
  */
 
-import { LitElement, html } from "lit";
+import { LitElement, html } from "lit-element";
 import { bootstrapStyles } from '@granite-elements/granite-lit-bootstrap/granite-lit-bootstrap.js';
 import { styles } from "./app-weather-styles.js";
 /**
@@ -51,6 +51,27 @@ export class AppWeather extends LitElement {
       loading: {
         type: Boolean
       },
+      /**
+      * The loading property indicates whether the weather is loading.
+      * @type {boolean}
+      */
+      _typeUrl: {
+        type: Object
+      },
+      /**
+      * The loading property indicates whether the weather is loading.
+      * @type {boolean}
+      */
+      setting: {
+        type: Object
+      },
+      /**
+      * The loading property indicates whether the weather is loading.
+      * @type {boolean}
+      */
+      constants: {
+        type: Array
+      },
     };
   }
 
@@ -59,6 +80,11 @@ export class AppWeather extends LitElement {
     this.apiKey = "";
     this._data = {};
     this.loading = false;
+    this._typeUrl = {
+      weather: 'weather',
+      forecast: 'forecast',
+    };
+    this.constants = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   }
 
   connectedCallback() {
@@ -67,7 +93,7 @@ export class AppWeather extends LitElement {
   }
 
   fetchWeather(city) {
-    fetch("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=metric&appid=" + this.apiKey)
+    fetch(`https://api.openweathermap.org/data/2.5/${this._typeUrl.weather}?q=${city}&lang=es&units=metric&appid=${this.apiKey}`)
       .then((response) => {
         if (!response.ok) {
           this.loading = true;
@@ -78,21 +104,64 @@ export class AppWeather extends LitElement {
         }
         return response.json();
       })
-      .then((data) => this.displayWeather(data));
+      .then(async (data) => {
+        const forecast = await this.fetchForecast(city);
+        this.displayWeather({ ...data, forecast })
+      });
+  }
+
+  async fetchForecast(city) {
+    const response = await fetch(`https://api.openweathermap.org/data/2.5/${this._typeUrl.forecast}?q=${city}&lang=es&units=metric&appid=${this.apiKey}`);
+    if (!response.ok) {
+      this.loading = true;
+      console.log("No weather found.");
+      throw new Error("No weather found.");
+    } else {
+      this.loading = false;
+    }
+    const data = await response.json();
+    let forecast = data.list.filter((x) => {
+      return x.dt_txt.substr(0, 10) !== new Date().toJSON().slice(0, 10);
+    });
+    let fs = [];
+    for (let f of forecast) {
+      let date = f.dt_txt.substr(0, 10);
+      if (!!fs[date]) {
+        fs[date].temp_max = f.main.temp_max > fs[date].temp_max ? f.main.temp_max : fs[date].temp_max;
+        fs[date].temp_min = f.main.temp_min < fs[date].temp_min ? f.main.temp_min : fs[date].temp_min;
+        fs[date].icon = f.weather[0].icon;
+      } else {
+        fs[date] = {
+          day: this.constants[new Date(date).getDay()],
+          temp_max: f.main.temp_max,
+          temp_min: f.main.temp_min,
+          icon: f.weather[0].icon
+        };
+      }
+    }
+    const forecastData = [];
+    for (let day in fs) {
+      forecastData.push(fs[day]);
+    }
+    return forecastData;
   }
 
   displayWeather(data) {
     const { name } = data;
     const { icon, description } = data.weather[0];
-    const { temp, humidity } = data.main;
+    const { temp, humidity, temp_max, temp_min } = data.main;
     const { speed } = data.wind;
+    const forecast = data.forecast;
     this._data = {
       name,
       icon,
       description,
       temp,
+      temp_max,
+      temp_min,
       humidity,
       speed,
+      forecast
     };
   }
 
@@ -108,10 +177,31 @@ export class AppWeather extends LitElement {
     return pattern.test(value);
   }
 
+  _renderForecastDays() {
+    if (this._data.forecast) {
+      return this._data.forecast.map(fs => {
+        return html`
+        <div class="col">
+         <div class="row row2">
+             <img
+               class="img-fluid"
+               src="https://openweathermap.org/img/wn/${fs.icon}.png"
+             />
+           </div>
+           <div class="row row1">${fs.day}</div>
+           <div class="row row3">${Number(fs.temp_max).toFixed()}&deg; ${Number(fs.temp_min).toFixed()}&deg;</div>
+         </div> `;
+      });
+    }
+  }
+
   render() {
     return html`
-     <!--   <div class="card">
-        <div class="search">
+      ${this._data && !this.loading
+        ? html`
+      <div class="weather-content">
+      <div class="container">
+      <div class="search">
           <input type="text" class="search-bar" placeholder="Search" @keyup=${this._search}>
           <button @click="${this._search}">
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1.5em"
@@ -122,99 +212,42 @@ export class AppWeather extends LitElement {
             </svg> 
           </button>
         </div>
-        ${this._data && !this.loading
-        ? html`
-            <div class="weather">
-              <h2 class="city">Weather in ${this._data.name}</h2>
-              <h1 class="temp">${this._data.temp}°C</h1>
-              <div class="flex">
-                <img src="https://openweathermap.org/img/wn/04n.png" alt="" class="icon" />
-                <div class="description">${this._data.description}</div>
-              </div>
-              <div class="humidity">Humidity: ${this._data.humidity} %"</div>
-              <div class="wind">Wind speed: ${this._data.speed} km/h</div>
-            </div>`
-        : html`
-          <div class="error">Oops! Something went wrong! 😢</div>`
-      }
-      </div>
-      </div> -->
-      <div class="weather-content">
-      <div class="container">
         <div class="card">
-          <div id="demo" class="carousel slide" data-ride="carousel">
-            <!-- The slideshow -->
-            <div class="carousel-inner">
-              <div class="carousel-item active">
+          <div class="carousel slide" data-ride="carousel">
+            <!-- The box -->
                 <div class="row">
                   <div class="col-6">
                     <div class="temp">${Number(this._data.temp).toFixed()}&deg;</div>
                     <div class="location">
                       <span class="current">${this._data.name}</span
-                      ><span class="separator"></span
-                      ><span class="next">Barcelona</span>
+                      >
                     </div>
-                    <div>Hoy</div>
+                    <div>Hoy ${this._data.description}</div>
                     <div class="humidity">
-                      20&deg; 17&deg; <span>Humidity: ${this._data.humidity}</span>
+                    ${Number(this._data.temp_max).toFixed()}&deg; ${Number(this._data.temp_min).toFixed()}&deg; <span>Humedad: ${this._data.humidity}%</span>
                     </div>
                   </div>
                   <div class="col-6 justify-content-right">
                     <img
                       class="img-fluid"
-                      src="https://img.icons8.com/ios/100/ffffff/sun.png"
+                      src="https://openweathermap.org/img/wn/${this._data.icon}.png"
                     />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
         </div>
         <hr />
-        <div class="card card-weekly-days">
-          <div id="demo" class="carousel slide" data-ride="carousel">
-            <!-- The slideshow -->
-            <div class="carousel-inner">
-              <div class="carousel-item active">
-                <div class="row">
-                  <div class="col">
-                    <div class="row row2">
-                      <img
-                        class="img-fluid"
-                        src="https://img.icons8.com/ios/100/ffffff/sun.png"
-                      />
-                    </div>
-                    <div class="row row1">Viernes</div>
-                    <div class="row row3">25&deg; 16&deg;</div>
-                  </div>
-                  <div class="col">
-                    <div class="row row2">
-                      <img
-                        class="img-fluid"
-                        src="https://img.icons8.com/ios/100/ffffff/sun.png"
-                      />
-                    </div>
-                    <div class="row row1">Sabado</div>
-                    <div class="row row3">25&deg; 17&deg;</div>
-                  </div>
-
-                  <div class="col">
-                    <div class="row row2">
-                      <img
-                        class="img-fluid"
-                        src="https://img.icons8.com/windows/100/ffffff/cloud.png"
-                      />
-                    </div>
-                    <div class="row row1">Domingo</div>
-                    <div class="row row3">25&deg; 17&deg;</div>
-                  </div>
-                </div>
+          <div class="card card-weekly-days">
+            <!-- Forecast day of week -->
+              <div class="row">
+                ${this._renderForecastDays()}
               </div>
-            </div>
           </div>
-        </div>
       </div>
-    </div>
+    </div>`
+        : html`
+          <div class="error">Oops! Something went wrong! 😢</div>`
+      }
      `;
   }
 }

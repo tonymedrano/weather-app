@@ -12,9 +12,9 @@
  * Where Megatron is a real super hero!
  */
 
- import { css } from "lit";
+import { css } from "lit";
 
- export const styles = css`
+export const styles = css`
  :host {
    display: block;
  }
@@ -105,6 +105,41 @@ background-color: #0d2242;
 color: #ffffff;
 }
 
+.search {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  margin: 0.5em;
+  border-radius: 50%;
+  border: none;
+  height: 44px;
+  width: 44px;
+  outline: none;
+  background: #7c7c7c2b;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+input.search-bar {
+  border: none;
+  outline: none;
+  padding: 0.4em 1em;
+  border-radius: 24px;
+  background: #7c7c7c2b;
+  color: white;
+  font-family: inherit;
+  font-size: 105%;
+  width: calc(100% - 100px);
+}
+
+button:hover {
+  background: #7c7c7c6b;
+}
+
 .card {
 padding: 1.5rem 1.5rem 1rem 1.5rem;
 border: none;
@@ -132,25 +167,8 @@ margin-left: 5px;
 }
 
 .location {
-position: relative;
-font-size: 1rem;
-}
-
-.location .current {
 font-size: 1.4rem;
 color: #68d0d1;
-}
-
-.location .separator {
-position: relative;
-bottom: 0.3rem;
-border: 1px solid #ffffff;
-margin-right: 0.4rem;
-margin-left: 0.4rem;
-}
-
-.location .next {
-color: #6e7a8f;
 }
 
 .img-fluid {
