@@ -12,7 +12,7 @@
  * Where Megatron is a real super hero!
  */
 
-import { LitElement, html } from "lit-element";
+import { LitElement, html } from "lit";
 import { bootstrapStyles } from '@granite-elements/granite-lit-bootstrap/granite-lit-bootstrap.js';
 import { styles } from "./app-weather-styles.js";
 /**
@@ -97,7 +97,6 @@ export class AppWeather extends LitElement {
       .then((response) => {
         if (!response.ok) {
           this.loading = true;
-          console.log("No weather found.");
           throw new Error("No weather found.");
         } else {
           this.loading = false;
@@ -106,7 +105,7 @@ export class AppWeather extends LitElement {
       })
       .then(async (data) => {
         const forecast = await this.fetchForecast(city);
-        this.displayWeather({ ...data, forecast })
+        this._resolveDisplayData({ ...data, forecast })
       });
   }
 
@@ -114,7 +113,6 @@ export class AppWeather extends LitElement {
     const response = await fetch(`https://api.openweathermap.org/data/2.5/${this._typeUrl.forecast}?q=${city}&lang=es&units=metric&appid=${this.apiKey}`);
     if (!response.ok) {
       this.loading = true;
-      console.log("No weather found.");
       throw new Error("No weather found.");
     } else {
       this.loading = false;
@@ -146,7 +144,7 @@ export class AppWeather extends LitElement {
     return forecastData;
   }
 
-  displayWeather(data) {
+  _resolveDisplayData(data) {
     const { name } = data;
     const { icon, description } = data.weather[0];
     const { temp, humidity, temp_max, temp_min } = data.main;
@@ -215,7 +213,7 @@ export class AppWeather extends LitElement {
   }
 
   _renderForecast() {
-    return this._data ? this._data.forecast.map(fs => {
+    return this._data.forecast ? this._data.forecast.map(fs => {
       return html`
         <div class="col">
           <div class="row img-row">
@@ -241,7 +239,7 @@ export class AppWeather extends LitElement {
             </div>`
         : html`
             <div class="error">Oops! Something went wrong! 😢</div>
-        `}
+        `};
       </div>
     </section>
   `;
