@@ -52,7 +52,7 @@
               "type": {
                 "text": "string"
               },
-              "default": "'Weather App'",
+              "default": "\"Weather App\"",
               "privacy": "public",
               "description": "The name to say \"Hello\" to.",
               "attribute": "name"
