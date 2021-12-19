@@ -13,7 +13,7 @@
  */
 
 
- import { LitElement, html, css } from "lit-element";
+ import { LitElement, html, css } from "lit";
  import './app-weather/app-weather.js';
 
  /**
@@ -36,16 +36,19 @@
  
    static get properties() {
      return {
+        name: { type: String }
      };
    }
  
    constructor() {
      super();
+      this.name = "LiElement Weather App";
    }
  
    render() {
      return html`
        <div class="container">
+         <h1>${this.name}</h1>
          <app-weather api-key="8bc1970103ed4fccd68b8ec1984dedc4"></app-weather>
       </div>
      `;

@@ -1,5 +1,5 @@
 # weather-app 🤖
-Enjoy a Lit-Element weather app! 
+Lit-Element weather app! 
 
 ## Setup
 Install dependencies:
@@ -14,10 +14,4 @@ npm test
 ## Dev Server
 ```bash
 npm run serve
-```
-## Linting
-To lint the project run:
-
-```bash
-npm run lint
 ```
