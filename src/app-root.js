@@ -4,7 +4,7 @@
  * Created Date: Wednesday, December 15th 2021, 12:46:23 pm
  * Author: Tony Alexander Medrano
  * -----
- * Last Modified: Sat Dec 18 2021
+ * Last Modified: Sun Dec 19 2021
  * Modified By: Tony Alexander Medrano
  * -----
  * Copyright (c) 2021 Tony Medrano DVLPR 🤖
@@ -19,9 +19,6 @@
  /**
   * app-root.
   *
-  * @fires count-changed - Indicates when the count changes
-  * @slot - This element has a slot
-  * @csspart button - The button
   */
  export class AppRoot extends LitElement {
    static get styles() {
@@ -30,6 +27,9 @@
          display: block;
          width: 100%;
          height: 100%;
+       }
+       .container {
+          max-width: 500px;
        }
      `;
    }
@@ -45,7 +45,9 @@
  
    render() {
      return html`
-       <app-weather api-key="8bc1970103ed4fccd68b8ec1984dedc4"></app-weather>
+       <div class="container">
+         <app-weather api-key="8bc1970103ed4fccd68b8ec1984dedc4"></app-weather>
+      </div>
      `;
    }
  }
